@@ -1,3 +1,4 @@
+from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, Any, Dict, Callable
 
 from asgiref.sync import sync_to_async
@@ -10,7 +11,7 @@ _Model = TypeVar('_Model', bound=Model)
 _Entity = TypeVar('_Entity', bound=BaseEntity)
 
 
-class BaseRepository(Generic[_Model, _Entity]):
+class BaseRepository(Generic[_Model, _Entity], ABC):
     model: type[_Model] = None
     entity: type[_Entity] = None
     map_to_entity: Callable = model_to_entity
@@ -27,6 +28,9 @@ class BaseRepository(Generic[_Model, _Entity]):
 
         assert self.model is not None, 'You must set "model" in constructor or class attribute'
         assert self.entity is not None, 'You must set "entity" in constructor or class attribute'
+
+    @abstractmethod
+    def create(self, **fields: Dict[str, Any]) -> _Entity: ...
 
 
 class ParserRepository(BaseRepository[_Model, _Entity]):

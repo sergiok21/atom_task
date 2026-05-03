@@ -1,7 +1,3 @@
-"""
-Модуль, що містить конвертацію моделі (django) в сутність (DTO / Entity)
-"""
-
 from typing import Any, TypeVar, List, Iterable
 from django.db import models
 

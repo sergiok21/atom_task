@@ -2,7 +2,7 @@ from typing import Callable, Dict, Any
 
 from asgiref.sync import sync_to_async
 
-from core.parser.base import BaseCommand
+from core.parser.meta.command import BaseCommand
 
 
 async def execute_commands(pipeline: dict[str, BaseCommand]) -> dict[str, str | int]:

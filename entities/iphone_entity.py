@@ -19,8 +19,3 @@ class IPhoneEntity(BaseEntity):
     diagonal: float
     pixels: str
     details: dict[str, Any]
-
-
-@dataclass
-class IPhoneEntityOut(IPhoneEntity):
-    pk: int

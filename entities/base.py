@@ -6,8 +6,6 @@ FieldMap = dict[str, str | Callable[[Any], Any]]
 
 
 class BaseEntity(ABC):
-    """Базова сутність з автогенерацією mapper() за metadata['src']."""
-
     @classmethod
     def mapper(cls) -> FieldMap:
         mapping: FieldMap = {}

@@ -1,24 +1,27 @@
-from core.parser.meta.get_object import GetFullName, GetColor, GetStorage, \
-    GetProducer, GetDefaultPrice, GetSalePrice, GetExist, GetProductCode, GetFeedback, GetDiagonal, GetPixel
 from typing import Any
-from playwright.async_api import async_playwright
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 from core.parser.meta.parser import BaseParser
 from core.parser.meta.property import XPathLocator, Url
-from core.parser.playwright.engine import PlaywrightEngine
-from core.parser.playwright.action import SearchFieldActionPlaywright, ButtonActionPlaywright
-from core.parser.playwright.get_object import GetImagePlaywright, GetDetailPlaywright
+from core.parser.selenium.engine import SeleniumEngine
+from core.parser.selenium.action import SearchFieldActionSelenium, ButtonActionSelenium
+from core.parser.selenium.get_object import GetImageSelenium, GetDetailSelenium
+from core.parser.meta.get_object import (
+    GetFullName, GetColor, GetStorage, GetProducer,
+    GetDefaultPrice, GetSalePrice, GetExist, GetProductCode,
+    GetFeedback, GetDiagonal, GetPixel
+)
 from entities.iphone_entity import IPhoneEntity
 from utils.process_manager import execute_commands
 
 
-class PlaywrightParser(BaseParser):
-    """Orchestrator for the Playwright-based scraping lifecycle."""
+class SeleniumParser(BaseParser):
     def __init__(self, url: str = Url.base_url):
-        """Initializes the parser with the base URL."""
         self.url = url
 
-    def create_pipeline(self, engine: PlaywrightEngine) -> dict[str, Any]:
-        """Maps entity fields to Playwright-specific extraction commands."""
+    def create_pipeline(self, engine: SeleniumEngine) -> dict[str, Any]:
         return {
             "full_name": GetFullName(engine, XPathLocator.full_name),
             "color": GetColor(engine, XPathLocator.color),
@@ -27,36 +30,40 @@ class PlaywrightParser(BaseParser):
             "default_price": GetDefaultPrice(engine, XPathLocator.default_price),
             "sale_price": GetSalePrice(engine, XPathLocator.sale_price),
             "exist": GetExist(engine, XPathLocator.exist),
-            "image_list": GetImagePlaywright(engine, XPathLocator.image_list),
+            "image_list": GetImageSelenium(engine, XPathLocator.image_list),
             "product_code": GetProductCode(engine, XPathLocator.product_code),
             "feedback_count": GetFeedback(engine, XPathLocator.feedback_count),
             "diagonal": GetDiagonal(engine, XPathLocator.diagonal),
             "pixels": GetPixel(engine, XPathLocator.pixels),
-            "details": GetDetailPlaywright(engine, XPathLocator.details),
+            "details": GetDetailSelenium(engine, XPathLocator.details),
         }
 
     async def parse(self) -> IPhoneEntity:
-        """Executes browser launch, navigation, actions, and data extraction."""
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
-            page = await browser.new_page()
-            engine = PlaywrightEngine(page)
+        chrome_options = Options()
+        # chrome_options.add_argument("--headless")
 
-            await page.goto(self.url)
-            await page.wait_for_load_state('domcontentloaded', timeout=4000)
+        driver = webdriver.Chrome(options=chrome_options)
 
-            search_field_action = SearchFieldActionPlaywright(page)
-            button_action = ButtonActionPlaywright(page)
+        try:
+            engine = SeleniumEngine(driver)
+
+            driver.get(self.url)
+
+            search_field_action = SearchFieldActionSelenium(driver)
+            button_action = ButtonActionSelenium(driver)
+
             await search_field_action.fill_and_send()
             await button_action.click()
 
-            await page.wait_for_load_state('domcontentloaded')
-
             get_field_pipeline = self.create_pipeline(engine)
             output_data = await execute_commands(pipeline=get_field_pipeline)
+
             iphone_entity = IPhoneEntity(**output_data)
             output_entity = await self.save_data(data=iphone_entity.__dict__, entity_cls=IPhoneEntity)
 
             print(output_entity)
-            await browser.close()
+
             return output_entity
+
+        finally:
+            driver.quit()
