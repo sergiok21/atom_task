@@ -11,7 +11,7 @@ class BaseCommand(ABC):
 
 @dataclass(frozen=True)
 class XPathLocator:
-    search_field: str = "//input[@class='quick-search-input']"
+    search_field: str = "//div[@class='header-bottom']//input[@class='quick-search-input']"
     element_from_grid = "//div[contains(@class, 'product-wrapper')]//div[@class='br-pp-img br-pp-img-grid']/a"
 
     full_name: str = "//h1[@class='desktop-only-title']"
@@ -48,7 +48,7 @@ class BS4Locator:
 
 @dataclass(frozen=True)
 class Url:
-    base_url: str = 'https://brain.com.ua/ukr'
+    base_url: str = 'https://brain.com.ua/ukr/'
     target_url: str = f'{base_url}/Mobilniy_telefon_Apple_iPhone_16_Pro_Max_256GB_Black_Titanium-p1145443.html'
 
 

@@ -1,3 +1,5 @@
+import asyncio
+
 from playwright.async_api import async_playwright
 
 from core.parser.base import Url
@@ -18,7 +20,9 @@ class PlaywrightParser:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=False)
             page = await browser.new_page()
-            await page.goto(self.url, wait_until='domcontentloaded')
+            await page.goto(self.url)
+
+            await page.wait_for_load_state('domcontentloaded', timeout=4000)
 
             search_field_action, button_action = SearchFieldAction(page), ButtonAction(page)
             await search_field_action.fill_and_send()

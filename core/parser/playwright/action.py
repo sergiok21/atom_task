@@ -12,7 +12,7 @@ class BaseAction:
 class SearchFieldAction(BaseAction):
     @async_sleep_after()
     async def fill_and_send(self, locator: str = XPathLocator.search_field, text: str = TextField.search_text) -> None:
-        search_field = self.page.locator(locator).last
+        search_field = self.page.locator(locator)
         await search_field.fill(text, timeout=2000)
         await search_field.press('Enter')
 
