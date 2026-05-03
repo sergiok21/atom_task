@@ -1,7 +1,7 @@
 from core.load_django import *
 import asyncio
 
-from core.parser.base import Url
+from core.parser.property import Url
 from core.parser.playwright.runner import PlaywrightParser
 
 
